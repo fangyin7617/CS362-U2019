@@ -128,15 +128,15 @@ int getWinners(int players[MAX_PLAYERS], struct gameState *state);
 /* Set array position of each player who won (remember ties!) to
    1, others to 0 */
 
-int baronEffect(int choice1, struct gameState *state, int currentPlayer);
+int baronEffect(int choice1, struct gameState *state, int currentPlayer, int *bonus);
 
 int minionEffect(int choice1, int choice2, struct gameState *state, int currentPlayer, int handPos);
 
 int ambassadorEffect(int choice1, int choice2, struct gameState *state, int currentPlayer, int handPos);
 
-int tributeEffect(struct gameState *state, int currentPlayer, int nextPlayer);
+void tributeEffect(struct gameState *state, int currentPlayer, int nextPlayer, int tributeRevealedCards[]);
 
-int mineEffect(int choice1, int choice2, struct gameState *state, int currentPlayer, int handPos);
+int mineEffect(int choice1, int choice2, struct gameState *state, int currentPlayer, int handPos, int nextPlayer);
 
 
 #endif
