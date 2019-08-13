@@ -26,6 +26,33 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * <p><b>URL Validation</b> routines.</p>
  * Behavior of validation is modified by passing in options:
@@ -108,7 +135,7 @@ public class UrlValidator implements Serializable {
      * This expression derived/taken from the BNF for URI (RFC2396).
      */
     private static final String URL_REGEX =
-        "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?";
+            "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?";
     //        12            3  4          5       6   7        8 9
     private static final Pattern URL_PATTERN = Pattern.compile(URL_REGEX);
 
@@ -135,7 +162,7 @@ public class UrlValidator implements Serializable {
     private static final Pattern SCHEME_PATTERN = Pattern.compile(SCHEME_REGEX);
 
     // Drop numeric, and  "+-." for now
-    // TODO does not allow for optional user info
+    // TODO does not allow for optional userinfo. 
     // Validation of character set is done by isValidAuthority
     private static final String AUTHORITY_CHARS_REGEX = "\\p{Alnum}\\-\\."; // allows for IPV4 but not IPV6
     private static final String IPV6_REGEX = "[0-9a-fA-F:]+"; // do this as separate match because : could cause ambiguity with port prefix
@@ -147,10 +174,10 @@ public class UrlValidator implements Serializable {
     private static final String USERINFO_CHARS_REGEX = "[a-zA-Z0-9%-._~!$&'()*+,;=]";
     // since neither ':' nor '@' are allowed chars, we don't need to use non-greedy matching
     private static final String USERINFO_FIELD_REGEX =
-        USERINFO_CHARS_REGEX + "+" + // At least one character for the name
-        "(?::" + USERINFO_CHARS_REGEX + "*)?@"; // colon and password may be absent
+            USERINFO_CHARS_REGEX + "+" + // At least one character for the name
+            "(?::" + USERINFO_CHARS_REGEX + "*)?@"; // colon and password may be absent
     private static final String AUTHORITY_REGEX =
-        "(?:\\[(" + IPV6_REGEX + ")\\]|(?:(?:" + USERINFO_FIELD_REGEX + ")?([" + AUTHORITY_CHARS_REGEX + "]*)))(?::(\\d*))?(.*)?";
+            "(?:\\[("+IPV6_REGEX+")\\]|(?:(?:"+USERINFO_FIELD_REGEX+")?([" + AUTHORITY_CHARS_REGEX + "]*)))(?::(\\d*))?(.*)?";
     //             1                          e.g. user:pass@          2                                         3       4
     private static final Pattern AUTHORITY_PATTERN = Pattern.compile(AUTHORITY_REGEX);
 
@@ -179,7 +206,7 @@ public class UrlValidator implements Serializable {
     /**
      * The set of schemes that are allowed to be in a URL.
      */
-    private final Set < String > allowedSchemes; // Must be lower-case
+    private final Set<String> allowedSchemes; // Must be lower-case
 
     /**
      * Regular expressions used to manually validate authorities if IANA
@@ -190,11 +217,7 @@ public class UrlValidator implements Serializable {
     /**
      * If no schemes are provided, default to this set.
      */
-    private static final String[] DEFAULT_SCHEMES = {
-        "http",
-        "https",
-        "ftp"
-    }; // Must be lower-case
+    private static final String[] DEFAULT_SCHEMES = {"http", "https", "ftp"}; // Must be lower-case
 
     /**
      * Singleton instance of this class with default schemes and options.
@@ -280,8 +303,8 @@ public class UrlValidator implements Serializable {
             if (schemes == null) {
                 schemes = DEFAULT_SCHEMES;
             }
-            allowedSchemes = new HashSet < String > (schemes.length);
-            for (int i = 0; i < schemes.length; i++) {
+            allowedSchemes = new HashSet<String>(schemes.length);
+            for(int i=0; i < schemes.length; i++) {
                 allowedSchemes.add(schemes[i].toLowerCase(Locale.ENGLISH));
             }
         }
@@ -311,22 +334,19 @@ public class UrlValidator implements Serializable {
         }
 
         String scheme = urlMatcher.group(PARSE_URL_SCHEME);
-        if (!isValidScheme(scheme)) {
+		if (!isValidScheme(scheme)) {
             return false;
         }
 
         String authority = urlMatcher.group(PARSE_URL_AUTHORITY);
-        if ("file".equals(scheme)) { // Special case - file: allows an empty authority
+        if ("file".equals(scheme)) {// Special case - file: allows an empty authority
             if (authority != null) {
                 if (authority.contains(":")) { // but cannot allow trailing :
-                    return false;
+                    return false; 
                 }
             }
             // drop through to continue validation
-        }
-
-        // not file:
-        else {
+        } else { // not file:
             // Validate the authority
             if (!isValidAuthority(authority)) {
                 return false;
@@ -338,11 +358,11 @@ public class UrlValidator implements Serializable {
         }
 
         if (!isValidQuery(urlMatcher.group(PARSE_URL_QUERY))) {
-            return false;
+            return false; 
         }
 
         if (!isValidFragment(urlMatcher.group(PARSE_URL_FRAGMENT))) {
-            return false;
+            return false;  
         }
 
         return false; //Bug 1: change true to false
@@ -405,9 +425,9 @@ public class UrlValidator implements Serializable {
         String ipv6 = authorityMatcher.group(PARSE_AUTHORITY_IPV6);
         if (ipv6 != null) {
             InetAddressValidator inetAddressValidator = InetAddressValidator.getInstance();
-            if (!inetAddressValidator.isValidInet6Address(ipv6)) {
-                return false;
-            }
+                if (!inetAddressValidator.isValidInet6Address(ipv6)) {
+                    return false;
+                }
         } else {
             String hostLocation = authorityMatcher.group(PARSE_AUTHORITY_HOST_IP);
             // check if authority is hostname or IP address:
@@ -435,7 +455,7 @@ public class UrlValidator implements Serializable {
         }
 
         String extra = authorityMatcher.group(PARSE_AUTHORITY_EXTRA);
-        if (extra != null && extra.trim().length() > 0) {
+        if (extra != null && extra.trim().length() > 0){
             return false;
         }
 
@@ -457,17 +477,16 @@ public class UrlValidator implements Serializable {
         }
 
         try {
-            URI uri = new URI(null, null, path, null);
+            URI uri = new URI(null,null,path,null);
             String norm = uri.normalize().getPath();
-            if (norm.startsWith("/../") // Trying to go via the parent dir
-                ||
-                norm.equals("/..")) { // Trying to go to the parent dir
+            if (norm.startsWith("/../") // Trying to go via the parent dir 
+             || norm.equals("/..")) {   // Trying to go to the parent dir
                 return false;
             }
         } catch (URISyntaxException e) {
             return false;
         }
-
+        
         int slash2Count = countToken("//", path);
         if (isOff(ALLOW_2_SLASHES) && (slash2Count > 0)) {
             return false;
